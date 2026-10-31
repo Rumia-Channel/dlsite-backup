@@ -1,0 +1,42 @@
+[project]
+name = "dlsite-backup"
+version = "0.1.0"
+description = "Back up DLsite Play purchases to local storage."
+readme = "README.md"
+authors = [
+    { name = "Rumia Channel", email = "github@rumia-ch.uk" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    # 1.0.0b+ required: 1.0.0b1 replaced aiohttp with curl-cffi (browser TLS
+    # fingerprint impersonation), which is what gets past DLsite's Cloudflare
+    # bot protection. 0.11.x returns HTTP 403 on every login attempt.
+    "dlsite-async[pil]>=1.0.0b4",
+    # Login is driven through a real browser so that the Cloudflare clearance
+    # cookie and the DLsite session are obtained without reverse-engineering
+    # the anti-bot flow.
+    # DevTools protocol client used to read the cookies out of the browser
+    # that the user logged in with.
+    "websockets>=13.0",
+    # Encrypts the session cookies at rest (pulled in by dlsite-async too, but
+    # declared explicitly because we depend on it directly).
+    "cryptography>=44.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=1.0",
+]
+
+[project.scripts]
+dlsite-backup = "dlsite_backup:main"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
